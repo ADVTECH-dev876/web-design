@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoTracker Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'mono': ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        'electric-blue': '#00D4FF',
+                        'neon-green': '#39FF14',
+                        'dark-bg': '#0A0A0F',
+                        'card-bg': '#1A1A24',
+                        'border-gray': '#2A2A3A',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-dark-bg text-white font-mono overflow-x-hidden">
+    <!-- Navigation -->
+    <nav class="bg-card-bg border-b border-border-gray px-6 py-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-8">
+                <h1 class="text-2xl font-bold text-electric-blue">CryptoTracker Pro</h1>
+                <div class="flex space-x-6">
+                    <button onclick="showScreen('dashboard')" class="nav-btn text-electric-blue border-b-2 border-electric-blue pb-1">Dashboard</button>
+                    <button onclick="showScreen('portfolio')" class="nav-btn text-gray-400 hover:text-white transition-colors">Portfolio</button>
+                    <button onclick="showScreen('markets')" class="nav-btn text-gray-400 hover:text-white transition-colors">Markets</button>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="text-sm">
+                    <span class="text-gray-400">Total Balance:</span>
+                    <span class="text-neon-green font-semibold ml-2" id="totalBalance">$47,832.45</span>
+                </div>
+                <div class="w-8 h-8 bg-electric-blue rounded-full flex items-center justify-center text-dark-bg font-bold">
+                    U
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboard" class="screen active">
+        <div class="p-6 space-y-6">
+            <!-- Portfolio Overview Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-card-bg border border-border-gray rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-gray-400 text-sm">Portfolio Value</span>
+                        <span class="text-neon-green text-xs">+2.4%</span>
+                    </div>
+                    <div class="text-2xl font-bold text-white">$47,832.45</div>
+                    <div class="text-sm text-gray-400">+$1,124.32 today</div>
+                </div>
+                
+                <div class="bg-card-bg border border-border-gray rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-gray-400 text-sm">24h Change</span>
+                        <span class="text-neon-green text-xs">↗</span>
+                    </div>
+                    <div class="text-2xl font-bold text-neon-green">+$2,341.67</div>
+                    <div class="text-sm text-gray-400">+5.14%</div>
+                </div>
+                
+                <div class="bg-card-bg border border-border-gray rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-gray-400 text-sm">Best Performer</span>
+                        <span class="text-electric-blue text-xs">ETH</span>
+                    </div>
+                    <div class="text-2xl font-bold text-electric-blue">+12.3%</div>
+                    <div class="text-sm text-gray-400">$3,247.89</div>
+                </div>
+                
+                <div class="bg-card-bg border border-border-gray rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-gray-400 text-sm">Active Positions</span>
+                        <span class="text-white text-xs">●</span>
+                    </div>
+                    <div class="text-2xl font-bold text-white">7</div>
+                    <div class="text-sm text-gray-400">2 alerts active</div>
+                </div>
+            </div>
+
+            <!-- Chart and Holdings -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Portfolio Chart -->
+                <div class="lg:col-span-2 bg-card-bg border border-border-gray rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold">Portfolio Performance</h3>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-1 text-xs bg-electric-blue text-dark-bg rounded">24H</button>
+                            <button class="px-3 py-1 text-xs text-gray-400 hover:text-white">7D</button>
+                            <button class="px-3 py-1 text-xs text-gray-400 hover:text-white">30D</button>
+                        </div>
+                    </div>
+                    <div class="h-64 relative">
+                        <canvas id="portfolioChart" class="w-full h-full"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Holdings -->
+                <div class="bg-card-bg border border-border-gray rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">Top Holdings</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-xs font-bold">₿</div>
+                                <div>
+                                    <div class="font-semibold">Bitcoin</div>
+                                    <div class="text-xs text-gray-400">BTC</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold">$28,450.32</div>
+                                <div class="text-xs text-neon-green">+3.2%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-xs font-bold">Ξ</div>
+                                <div>
+                                    <div class="font-semibold">Ethereum</div>
+                                    <div class="text-xs text-gray-400">ETH</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold">$12,890.45</div>
+                                <div class="text-xs text-neon-green">+12.3%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-xs font-bold">◎</div>
+                                <div>
+                                    <div class="font-semibold">Solana</div>
+                                    <div class="text-xs text-gray-400">SOL</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold">$4,234.67</div>
+                                <div class="text-xs text-red-400">-1.8%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="bg-card-bg border border-border-gray rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Recent Activity</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between py-2 border-b border-border-gray">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-2 h-2 bg-neon-green rounded-full animate-pulse"></div>
+                            <span>Bought 0.5 ETH</span>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm">$1,623.45</div>
+                            <div class="text-xs text-gray-400">2 min ago</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between py-2 border-b border-border-gray">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-2 h-2 bg-electric-blue rounded-full"></div>
+                            <span>Price Alert: BTC > $65,000</span>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-electric-blue">Triggered</div>
+                            <div class="text-xs text-gray-400">15 min ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Portfolio Screen -->
+    <div id="portfolio" class="screen">
+        <div class="p-6 space-y-6">
+            <!-- Portfolio Header -->
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-bold">My Portfolio</h2>
+                <button class="bg-electric-blue text-dark-bg px-4 py-2 rounded-lg font-semibold hover:bg-blue-400 transition-colors">
+                    + Add Position
+                </button>
+            </div>
+
+            <!-- Portfolio Allocation -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-card-bg border border-border-gray rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">Asset Allocation</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-4 h-4 bg-orange-500 rounded"></div>
+                                <span>Bitcoin (BTC)</span>
+                            </div>
+                            <span class="font-semibold">59.5%</span>
+                        </div>
+                        <div class="w-full bg-border-gray rounded-full h-2">
+                            <div class="bg-orange-500 h-2 rounded-full" style="width: 59.5%"></div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-4 h-4 bg-blue-500 rounded"></div>
+                                <span>Ethereum (ETH)</span>
+                            </div>
+                            <span class="font-semibold">26.9%</span>
+                        </div>
+                        <div class="w-full bg-border-gray rounded-full h-2">
+                            <div class="bg-blue-500 h-2 rounded-full" style="width: 26.9%"></div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-4 h-4 bg-purple-500 rounded"></div>
+                                <span>Others</span>
+                            </div>
+                            <span class="font-semibold">13.6%</span>
+                        </div>
+                        <div class="w-full bg-border-gray rounded-full h-2">
+                            <div class="bg-purple-500 h-2 rounded-full" style="width: 13.6%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-card-bg border border-border-gray rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">Performance Metrics</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Total Return</span>
+                            <span class="text-neon-green font-semibold">+$12,847.32 (36.8%)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Best Day</span>
+                            <span class="text-neon-green font-semibold">+$3,421.67</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Worst Day</span>
+                            <span class="text-red-400 font-semibold">-$2,156.43</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Win Rate</span>
+                            <span class="text-electric-blue font-semibold">68.4%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Holdings -->
+            <div class="bg-card-bg border border-border-gray rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">All Holdings</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-border-gray">
+                                <th class="text-left py-3 text-gray-400 font-medium">Asset</th>
+                                <th class="text-right py-3 text-gray-400 font-medium">Holdings</th>
+                                <th class="text-right py-3 text-gray-400 font-medium">Price</th>
+                                <th class="text-right py-3 text-gray-400 font-medium">24h Change</th>
+                                <th class="text-right py-3 text-gray-400 font-medium">Value</th>
+                                <th class="text-right py-3 text-gray-400 font-medium">P&L</th>
+                            </tr>
+                        </thead>
+                        <tbody class="space-y-2">
+                            <tr class="border-b border-border-gray/50">
+                                <td class="py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-xs font-bold">₿</div>
+                                        <div>
+                                            <div class="font-semibold">Bitcoin</div>
+                                            <div class="text-xs text-gray-400">BTC</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-right py-4">0.4387 BTC</td>
+                                <td class="text-right py-4">$64,892.34</td>
+                                <td class="text-right py-4 text-neon-green">+3.2%</td>
+                                <td class="text-right py-4 font-semibold">$28,450.32</td>
+                                <td class="text-right py-4 text-neon-green">+$8,234.12</td>
+                            </tr>
+                            <tr class="border-b border-border-gray/50">
+                                <td class="py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-xs font-bold">Ξ</div>
+                                        <div>
+                                            <div class="font-semibold">Ethereum</div>
+                                            <div class="text-xs text-gray-400">ETH</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-right py-4">3.97 ETH</td>
+                                <td class="text-right py-4">$3,247.89</td>
+                                <td class="text-right py-4 text-neon-green">+12.3%</td>
+                                <td class="text-right py-4 font-semibold">$12,890.45</td>
+                                <td class="text-right py-4 text-neon-green">+$3,456.78</td>
+                            </tr>
+                            <tr class="border-b border-border-gray/50">
+                                <td class="py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-xs font-bold">◎</div>
+                                        <div>
+                                            <div class="font-semibold">Solana</div>
+                                            <div class="text-xs text-gray-400">SOL</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-right py-4">28.45 SOL</td>
+                                <td class="text-right py-4">$148.92</td>
+                                <td class="text-right py-4 text-red-400">-1.8%</td>
+                                <td class="text-right py-4 font-semibold">$4,234.67</td>
+                                <td class="text-right py-4 text-neon-green">+$892.34</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Markets Screen -->
+    <div id="markets" class="screen">
+        <div class="p-6 space-y-6">
+            <!-- Market Header -->
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-bold">Market Overview</h2>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-neon-green rounded-full animate-pulse"></div>
+                        <span class="text-sm text-gray-400">Live Data</span>
+                    </div>
+                    <button class="bg-card-bg border border-border-gray px-4 py-2 rounded-lg text-sm hover:border-electric-blue transition-colors">
+                        Watchlist
+                    </button>
+                </div>
+            </div>
+
+            <!-- Market Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-card-bg border border-border-gray rounded-lg p-6">
+                    <div class="text-sm text-gray-400 mb-2">Market Cap</div>
+                    <div class="text-2xl font-bold">$2.34T</div>
+                    <div class="text-sm text-neon-green">+4.2% (24h)</div>
+                </div>
+                <div class="bg-card-bg border border-border-gray rounded-lg p-6">
+                    <div class="text-sm text-gray-400 mb-2">24h Volume</div>
+                    <div class="text-2xl font-bold">$89.7B</div>
+                    <div class="text-sm text-red-400">-2.1% (24h)</div>
+                </div>
+                <div class="bg-card-bg border border-border-gray rounded-lg p-6">
+                    <div class="text-sm text-gray-400 mb-2">BTC Dominance</div>
+                    <div class="text-2xl font-bold">52.3%</div>
+                    <div class="text-sm text-electric-blue">+0.8% (24h)</div>
+                </div>
+            </div>
+
+            <!-- Market Table -->
+            <div class="bg-card-bg border border-border-gray rounded-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">Top Cryptocurrencies</h3>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 text-xs bg-electric-blue text-dark-bg rounded">Market Cap</button>
+                        <button class="px-3 py-1 text-xs text-gray-400 hover:text-white">Volume</button>
+                        <button class="px-3 py-1 text-xs text-gray-400 hover:text-white">Gainers</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-border-gray">
+                                <th class="text-left py-3 text-gray-400 font-medium">#</th>
+                                <th class="text-left py-3 text-gray-400 font-medium">Name</th>
+                                <th class="text-right py-3 text-gray-400 font-medium">Price</th>
+                                <th class="text-right py-3 text-gray-400 font-medium">24h %</th>
+                                <th class="text-right py-3 text-gray-400 font-medium">7d %</th>
+                                <th class="text-right py-3 text-gray-400 font-medium">Market Cap</th>
+                                <th class="text-right py-3 text-gray-400 font-medium">Volume (24h)</th>
+                                <th class="text-center py-3 text-gray-400 font-medium">Chart</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-border-gray/50 hover:bg-border-gray/20 transition-colors">
+                                <td class="py-4">1</td>
+                                <td class="py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-xs font-bold">₿</div>
+                                        <div>
+                                            <div class="font-semibold">Bitcoin</div>
+                                            <div class="text-xs text-gray-400">BTC</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-right py-4 font-semibold">$64,892.34</td>
+                                <td class="text-right py-4 text-neon-green">+3.24%</td>
+                                <td class="text-right py-4 text-neon-green">+8.91%</td>
+                                <td class="text-right py-4">$1.28T</td>
+                                <td class="text-right py-4">$28.4B</td>
+                                <td class="text-center py-4">
+                                    <div class="w-16 h-8 bg-neon-green/20 rounded flex items-end justify-center space-x-1">
+                                        <div class="w-1 bg-neon-green rounded-t" style="height: 60%"></div>
+                                        <div class="w-1 bg-neon-green rounded-t" style="height: 80%"></div>
+                                        <div class="w-1 bg-neon-green rounded-t" style="height: 40%"></div>
+                                        <div class="w-1 bg-neon-green rounded-t" style="height: 100%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-border-gray/50 hover:bg-border-gray/20 transition-colors">
+                                <td class="py-4">2</td>
+                                <td class="py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-xs font-bold">Ξ</div>
+                                        <div>
+                                            <div class="font-semibold">Ethereum</div>
+                                            <div class="text-xs text-gray-400">ETH</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-right py-4 font-semibold">$3,247.89</td>
+                                <td class="text-right py-4 text-neon-green">+12.31%</td>
+                                <td class="text-right py-4 text-neon-green">+15.67%</td>
+                                <td class="text-right py-4">$390.2B</td>
+                                <td class="text-right py-4">$15.7B</td>
+                                <td class="text-center py-4">
+                                    <div class="w-16 h-8 bg-neon-green/20 rounded flex items-end justify-center space-x-1">
+                                        <div class="w-1 bg-neon-green rounded-t" style="height: 40%"></div>
+                                        <div class="w-1 bg-neon-green rounded-t" style="height: 70%"></div>
+                                        <div class="w-1 bg-neon-green rounded-t" style="height: 90%"></div>
+                                        <div class="w-1 bg-neon-green rounded-t" style="height: 100%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-border-gray/50 hover:bg-border-gray/20 transition-colors">
+                                <td class="py-4">3</td>
+                                <td class="py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-xs font-bold">₮</div>
+                                        <div>
+                                            <div class="font-semibold">Tether</div>
+                                            <div class="text-xs text-gray-400">USDT</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-right py-4 font-semibold">$1.0001</td>
+                                <td class="text-right py-4 text-gray-400">+0.01%</td>
+                                <td class="text-right py-4 text-gray-400">-0.02%</td>
+                                <td class="text-right py-4">$83.2B</td>
+                                <td class="text-right py-4">$42.1B</td>
+                                <td class="text-center py-4">
+                                    <div class="w-16 h-8 bg-gray-500/20 rounded flex items-end justify-center space-x-1">
+                                        <div class="w-1 bg-gray-500 rounded-t" style="height: 50%"></div>
+                                        <div class="w-1 bg-gray-500 rounded-t" style="height: 48%"></div>
+                                        <div class="w-1 bg-gray-500 rounded-t" style="height: 52%"></div>
+                                        <div class="w-1 bg-gray-500 rounded-t" style="height: 49%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Trending & News -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-card-bg border border-border-gray rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">🔥 Trending</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-sm text-gray-400">1.</span>
+                                <span>Pepe (PEPE)</span>
+                            </div>
+                            <span class="text-neon-green text-sm">+45.2%</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-sm text-gray-400">2.</span>
+                                <span>Dogecoin (DOGE)</span>
+                            </div>
+                            <span class="text-neon-green text-sm">+23.1%</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-sm text-gray-400">3.</span>
+                                <span>Chainlink (LINK)</span>
+                            </div>
+                            <span class="text-neon-green text-sm">+18.7%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-card-bg border border-border-gray rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">📰 Market News</h3>
+                    <div class="space-y-3">
+                        <div class="border-l-2 border-electric-blue pl-3">
+                            <div class="text-sm font-medium">Bitcoin ETF sees record inflows</div>
+                            <div class="text-xs text-gray-400">2 hours ago</div>
+                        </div>
+                        <div class="border-l-2 border-neon-green pl-3">
+                            <div class="text-sm font-medium">Ethereum upgrade scheduled for Q2</div>
+                            <div class="text-xs text-gray-400">4 hours ago</div>
+                        </div>
+                        <div class="border-l-2 border-purple-500 pl-3">
+                            <div class="text-sm font-medium">Major exchange lists new altcoins</div>
+                            <div class="text-xs text-gray-400">6 hours ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Screen navigation
+        function showScreen(screenName) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show selected screen
+            document.getElementById(screenName).classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-electric-blue', 'border-b-2', 'border-electric-blue', 'pb-1');
+                btn.classList.add('text-gray-400');
+            });
+            
+            event.target.classList.remove('text-gray-400');
+            event.target.classList.add('text-electric-blue', 'border-b-2', 'border-electric-blue', 'pb-1');
+        }
+
+        // Simulate real-time price updates
+        function updatePrices() {
+            const priceElements = document.querySelectorAll('[data-price]');
+            priceElements.forEach(element => {
+                const currentPrice = parseFloat(element.textContent.replace(/[$,]/g, ''));
+                const change = (Math.random() - 0.5) * 0.02; // ±1% change
+                const newPrice = currentPrice * (1 + change);
+                element.textContent = '$' + newPrice.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                
+                // Add flash animation
+                element.classList.add('animate-pulse');
+                setTimeout(() => element.classList.remove('animate-pulse'), 500);
+            });
+        }
+
+        // Draw simple portfolio chart
+        function drawPortfolioChart() {
+            const canvas = document.getElementById('portfolioChart');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.offsetWidth;
+            const height = canvas.height = canvas.offsetHeight;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Generate sample data points
+            const points = [];
+            const baseValue = 45000;
+            for (let i = 0; i < 24; i++) {
+                const variation = Math.sin(i * 0.3) * 2000 + Math.random() * 1000;
+                points.push(baseValue + variation + (i * 100));
+            }
+            
+            // Draw grid
+            ctx.strokeStyle = '#2A2A3A';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 5; i++) {
+                const y = (height / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
+            // Draw chart line
+            ctx.strokeStyle = '#00D4FF';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            points.forEach((point, index) => {
+                const x = (width / (points.length - 1)) * index;
+                const y = height - ((point - Math.min(...points)) / (Math.max(...points) - Math.min(...points))) * height;
+                
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            
+            ctx.stroke();
+            
+            // Add gradient fill
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.closePath();
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, 'rgba(0, 212, 255, 0.2)');
+            gradient.addColorStop(1, 'rgba(0, 212, 255, 0.02)');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            drawPortfolioChart();
+            
+            // Update prices every 5 seconds
+            setInterval(updatePrices, 5000);
+            
+            // Redraw chart on window resize
+            window.addEventListener('resize', drawPortfolioChart);
+        });
+    </script>
+
+    <style>
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1A1A24;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #2A2A3A;
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00D4FF;
+        }
+        
+        /* Smooth transitions */
+        * {
+            transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+        }
+        
+        /* Price change animations */
+        @keyframes priceUp {
+            0% { background-color: rgba(57, 255, 20, 0.2); }
+            100% { background-color: transparent; }
+        }
+        
+        @keyframes priceDown {
+            0% { background-color: rgba(239, 68, 68, 0.2); }
+            100% { background-color: transparent; }
+        }
+        
+        .price-up {
+            animation: priceUp 0.5s ease-out;
+        }
+        
+        .price-down {
+            animation: priceDown 0.5s ease-out;
+        }
+    </style>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9818e0f767c67fa1',t:'MTc1ODI4Mjc2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
